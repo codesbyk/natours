@@ -1,16 +1,3 @@
-const fs = require('fs');
-
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
-);
-
-const checkID = (req, res, next, val) => {
-  if (+req.params.id > tours.length) {
-    return res.status(404).json({ status: 'Failed', message: 'Invalid ID' });
-  }
-  next();
-};
-
 const checkIncomingReqBody = (req, res, next) => {
   if (!req.body.name || !req.body.price) {
     return res
@@ -24,38 +11,24 @@ const getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
     requestedAt: req.timestamp,
-    results: tours.length,
-    data: { tours },
+    message: 'Get All Tours Here....',
   });
 };
 
 const getTour = (req, res) => {
   const id = +req.params.id;
-  const tour = tours.find((tourItem) => tourItem.id === id);
   res.status(200).json({
+    id,
     status: 'Success',
-    data: {
-      tour,
-    },
+    message: 'Get Tour Here....',
   });
 };
 
 const createTour = (req, res) => {
-  const newId = tours[tours.length - 1].id + 1;
-  const newTour = { ...req.body, id: newId };
-  tours.push(newTour);
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    () => {
-      res.status(201).json({
-        status: 'Success',
-        data: {
-          tour: newTour,
-        },
-      });
-    },
-  );
+  res.status(201).json({
+    status: 'Success',
+    message: 'Create a Tour Here....',
+  });
 };
 
 const updateTour = (req, res) => {
@@ -80,6 +53,5 @@ module.exports = {
   createTour,
   updateTour,
   deleteTour,
-  checkID,
   checkIncomingReqBody,
 };

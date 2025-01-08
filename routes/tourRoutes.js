@@ -5,7 +5,6 @@ const {
   getTour,
   updateTour,
   deleteTour,
-  checkID,
   checkIncomingReqBody,
 } = require('../controllers/tourController');
 
@@ -13,7 +12,7 @@ const {
 const tourRouter = express.Router();
 
 // Check if ID is exists in records
-tourRouter.param('id', checkID);
+// tourRouter.param('id', checkID);
 
 // Mount the routes
 tourRouter.route('/').get(getAllTours).post(checkIncomingReqBody, createTour);
