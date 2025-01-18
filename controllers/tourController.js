@@ -1,6 +1,21 @@
 const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
 
+const monthsList = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+
 const aliasTopTours = (req, res, next) => {
   req.query.limit = '5';
   req.query.sort = '-ratingsAverage,price';
@@ -162,6 +177,66 @@ const getTourStats = async (req, res) => {
   }
 };
 
+const getMonthlyPlan = async (req, res, next) => {
+  try {
+    const year = +req.params.year || new Date().getFullYear();
+
+    const plan = await Tour.aggregate([
+      {
+        $unwind: '$startDates',
+      },
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: '$startDates' },
+          numTourStarts: { $sum: 1 },
+          tours: { $push: '$name' },
+        },
+      },
+      {
+        $addFields: {
+          // month: '$_id',
+          monthName: { $arrayElemAt: [monthsList, { $subtract: ['$_id', 1] }] },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+      {
+        $sort: {
+          numTourStarts: -1,
+        },
+      },
+      {
+        $limit: 6,
+      },
+    ]);
+
+    res.status(200).json({
+      status: 'Success',
+      result: plan.length,
+      data: {
+        plan,
+      },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'Error',
+      message: 'Invalid Data',
+      error: err,
+    });
+  }
+};
+
 module.exports = {
   getAllTours,
   getTour,
@@ -170,4 +245,5 @@ module.exports = {
   deleteTour,
   aliasTopTours,
   getTourStats,
+  getMonthlyPlan,
 };
