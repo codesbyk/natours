@@ -11,6 +11,11 @@ const handleDuplicateFieldsDB = (err) => {
   return new AppError(message, BAD_REQUEST);
 };
 
+const handleValidationErrorDB = (err) => {
+  const message = Object.values(err.errors).map((val) => val.message);
+  return new AppError(message.join(', '), BAD_REQUEST);
+};
+
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -44,8 +49,10 @@ module.exports = (err, req, res, next) => {
     sendErrorDev(error, res);
   } else if (process.env.NODE_ENV === 'production') {
     if (error.name === 'CastError') error = handleCastErrorDB(error);
-    if (error.errorResponse.code === 11000)
+    if (error.errorResponse?.code === 11000)
       error = handleDuplicateFieldsDB(error);
+    if (error.name === 'ValidationError')
+      error = handleValidationErrorDB(error);
     sendErrorProd(error, res);
   }
 };

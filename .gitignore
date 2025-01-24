@@ -2,3 +2,4 @@ node_modules
 access.dev.log
 access.prod.log
 config.env
+server-error.log
