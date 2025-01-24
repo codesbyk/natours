@@ -1,8 +1,3 @@
-//////////////// STATUS CODES AND DEFINITION
-// 200 - OK
-// 201 - Created
-// 204 - No Content
-// 500 - Internal Server Error
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
@@ -12,6 +7,8 @@ const AppError = require('./utils/appError');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const globalErrorController = require('./controllers/errorController');
+
+const { NOT_FOUND } = require('./utils/httpStatusCodes');
 
 const app = express();
 
@@ -58,7 +55,10 @@ app.use('/api/v1/users', userRouter);
 
 // Handling undefined routes globally. This should be the last place STARTS HERE
 app.all('*', (req, res, next) => {
-  const err = new AppError(`Can't find ${req.originalUrl} on this server`, 404);
+  const err = new AppError(
+    `Can't find ${req.originalUrl} on this server`,
+    NOT_FOUND,
+  );
   next(err);
 });
 

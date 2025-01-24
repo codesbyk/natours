@@ -8,9 +8,12 @@ const DB = process.env.DATABASE_CONNECTION_STRING.replace(
   process.env.DATABASE_PASSWORD,
 );
 
-mongoose.connect(DB).then(() => {
-  console.log('Connected to MongoDB');
-});
+mongoose
+  .connect(DB)
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch((err) => console.log(err, 'MONGODB ERROR'));
 
 const app = require('./app');
 

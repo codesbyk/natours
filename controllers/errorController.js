@@ -1,13 +1,14 @@
 const AppError = require('./../utils/appError');
+const { BAD_REQUEST, INTERNAL_SERVER } = require('../utils/httpStatusCodes');
 
 const handleCastErrorDB = (err) => {
   const message = `Invalid ${err.path}: ${err.value}`;
-  return new AppError(message, 400);
+  return new AppError(message, BAD_REQUEST);
 };
 
 const handleDuplicateFieldsDB = (err) => {
   const message = `Duplicate field value ${err.keyValue.name}, Please use another value`;
-  return new AppError(message, 400);
+  return new AppError(message, BAD_REQUEST);
 };
 
 const sendErrorDev = (err, res) => {
@@ -26,7 +27,7 @@ const sendErrorProd = (err, res) => {
       message: err.message,
     });
   } else {
-    res.status(500).json({
+    res.status(INTERNAL_SERVER).json({
       status: 'Error',
       message: 'Something went wrong. Internal error occurred',
     });
@@ -36,7 +37,7 @@ const sendErrorProd = (err, res) => {
 module.exports = (err, req, res, next) => {
   let convertErrorObj = JSON.parse(JSON.stringify(err));
   let error = { ...convertErrorObj };
-  error.statusCode = error.statusCode || 500;
+  error.statusCode = error.statusCode || INTERNAL_SERVER;
   error.status = error.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
