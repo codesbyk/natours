@@ -119,4 +119,28 @@ const restrictTo = (...roles) => {
   };
 };
 
-module.exports = { signUp, login, protect, restrictTo };
+const forgotPassword = catchAsync(async (req, res, next) => {
+  // 1) Get user based on end user email provided
+  const user = await User.findOne({ email: req.body.email });
+  console.log(user);
+  if (!user) {
+    return next(new AppError('No user found with that email', NOT_FOUND));
+  }
+
+  // 2) Generate a random token (NOT A JWT Token)
+  const resetToken = user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false });
+
+  // 3) Send an email to the user with the token
+});
+
+const resetPassword = (req, res, next) => {};
+
+module.exports = {
+  signUp,
+  login,
+  protect,
+  restrictTo,
+  forgotPassword,
+  resetPassword,
+};
