@@ -77,6 +77,26 @@ const deleteUser = (req, res) => {
   });
 };
 
+const deleteMe = catchAsync(async (req, res, next) => {
+  // 1) Get user from collection
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { active: false },
+    {
+      new: true,
+    },
+  );
+
+  if (!user) {
+    return next(new AppError('User not found', NOT_FOUND));
+  }
+
+  res.status(OK).json({
+    status: 'success',
+    message: 'User deleted successfully',
+  });
+});
+
 module.exports = {
   getAllUsers,
   createUser,
@@ -84,4 +104,5 @@ module.exports = {
   updateUser,
   deleteUser,
   updateMe,
+  deleteMe,
 };
