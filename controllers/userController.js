@@ -1,6 +1,19 @@
 const User = require('./../models/userModel');
 const { catchAsync } = require('./../utils/catchAsync');
-const { NOT_IMPLEMENTED, OK } = require('../utils/httpStatusCodes');
+const {
+  NOT_IMPLEMENTED,
+  OK,
+  BAD_REQUEST,
+} = require('../utils/httpStatusCodes');
+const AppError = require('../utils/appError');
+
+const filterObj = (obj, ...allowedFields) => {
+  const newObj = {};
+  Object.keys(obj).forEach((el) => {
+    if (allowedFields.includes(el)) newObj[el] = obj[el];
+  });
+  return newObj;
+};
 
 /////////////////////////////// USERS
 const getAllUsers = catchAsync(async (req, res, next) => {
@@ -10,6 +23,28 @@ const getAllUsers = catchAsync(async (req, res, next) => {
     results: users.length,
     data: {
       users,
+    },
+  });
+});
+
+const updateMe = catchAsync(async (req, res, next) => {
+  const filteredBody = filterObj(req.body, 'name', 'email');
+  // 1) Create error if user Posts password data
+  if (req.body.password || req.body.confirmPassword) {
+    return next(
+      new AppError('This route does not allow password updates', BAD_REQUEST),
+    );
+  }
+  // 2) Update user document
+  const user = await User.findByIdAndUpdate(req.user._id, filteredBody, {
+    new: true,
+    runValidators: true,
+  });
+
+  res.status(OK).json({
+    status: 'success',
+    data: {
+      user: user,
     },
   });
 });
@@ -48,4 +83,5 @@ module.exports = {
   getUser,
   updateUser,
   deleteUser,
+  updateMe,
 };
