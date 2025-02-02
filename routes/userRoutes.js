@@ -11,6 +11,8 @@ const {
   login,
   forgotPassword,
   resetPassword,
+  updatePassword,
+  protect,
 } = require('../controllers/authController');
 
 // Define routes
@@ -21,7 +23,8 @@ userRouter.post('/signup', signUp);
 userRouter.post('/login', login);
 
 userRouter.post('/forgotPassword', forgotPassword);
-userRouter.post('/resetPassword', resetPassword);
+userRouter.patch('/resetPassword/:token', resetPassword);
+userRouter.patch('/updateMyPassword', protect, updatePassword);
 
 // Mount the routes
 userRouter.route('/').get(getAllUsers).post(createUser);

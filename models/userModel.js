@@ -55,6 +55,14 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+userSchema.pre('save', function (next) {
+  // isModified and isNew are part of mongoose mongo documentation
+  if (!this.isModified('password') || this.isNew) return next();
+  // 1000 milli second added due to avoid lag at passwordChangeAt
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
 userSchema.methods.correctPassword = async function (
   candidatePassword,
   userPassword,
@@ -84,11 +92,6 @@ userSchema.methods.createPasswordResetToken = function () {
     .update(resetToken)
     .digest('hex');
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-  console.log({
-    resetToken,
-    encrypted: this.passwordResetToken,
-    expires: this.passwordResetExpires,
-  });
   return resetToken;
 };
 
